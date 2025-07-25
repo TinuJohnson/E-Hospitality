@@ -12,9 +12,8 @@ from .forms import AppointmentForm
 from django.shortcuts import render, redirect, get_object_or_404
 import razorpay
 from django.http import HttpResponse
-
-
-
+from django.utils import timezone
+from django.core.paginator import Paginator
 
 
 def user_selection(request):
@@ -38,30 +37,26 @@ def register_patient(request):
         allergies = request.POST.get('allergies', '').strip()
         medical_history = request.POST.get('medical_history', '').strip()
 
-        # Validate required fields
+    
         if not all([name, password, password1, email, date_of_birth, contact_number, address]):
             messages.error(request, "Please fill all required fields.")
             return redirect('register_patient')
 
-        # Password validation
+ 
         if password != password1:
             messages.error(request, "Passwords do not match.")
             return redirect('register_patient')
         
         
-
-      
-
-        # Phone number validation
         if not contact_number.isdigit() or len(contact_number) < 10:
             messages.error(request, "Please enter a valid phone number.")
             return redirect('register_patient')
 
         try:
-            # Create patient with hashed password
+            
             patient = Patient(
                 name=name,
-                password=password,  # Hash the password
+                password=password,  
                 email=email,
                 gender=gender,
                 bloodgroup=bloodgroup,
@@ -72,7 +67,6 @@ def register_patient(request):
                 medical_history=medical_history
             )
             
-            # Full clean and validate model
             patient.full_clean()
             patient.save()
 
@@ -83,13 +77,14 @@ def register_patient(request):
         except Exception as e:
             messages.error(request, f"Registration failed: {str(e)}")
 
-    # Add choices context for dropdowns in template
+  
     context = {
         'gender_choices': Patient.GENDER_CHOICES,
         'bloodgroup_choices': Patient.BLOOD_GROUP_CHOICES ,
     }
     
     return render(request, 'patient/register_patient.html', context)
+
 
 def login_patient(request):
     if request.method == 'POST':
@@ -101,11 +96,9 @@ def login_patient(request):
             return redirect('login_patient')
         
         try:
-            # Find patient by phone number
             patient = Patient.objects.get(contact_number=phone_number)
             
-            # Check password (assuming you've implemented password hashing)
-            if patient.password == password:  # Note: In production, use proper password checking
+            if patient.password == password:  
                 request.session['patient_id'] = patient.id
                 request.session['patient_name'] = patient.name
                 
@@ -122,18 +115,6 @@ def login_patient(request):
     return render(request, 'patient/login_patient.html')
 
 
-def home_patient(request):
-    patient_id = request.session.get('patient_id')
-    if not patient_id:
-        return redirect('login_patient')
-    
-    doctors = Doctor.objects.all()
-    appointments=Appointment.objects.filter(patient=patient_id)
-    
-
-    patient = Patient.objects.get(id=patient_id)
-    return render(request, 'patient/home_patient.html', {'patient': patient , 'doctors':doctors , 'appointments':appointments})
-
 
 def admin_login(request):
     if request.method == 'POST':
@@ -145,11 +126,9 @@ def admin_login(request):
             return redirect('login_admin')
         
         try:
-            # Find patient by phone number
             admin = Admin.objects.get(username=username)
             
-            # Check password (assuming you've implemented password hashing)
-            if admin.password == password:  # Note: In production, use proper password checking
+            if admin.password == password:  
                 request.session['admin_id'] = admin.id
                 request.session['admin_username'] = admin.username
                 
@@ -166,79 +145,6 @@ def admin_login(request):
     return render(request, 'admin/login_admin.html')
 
 
-def home_admin(request):
-      
-    return render(request, 'admin/home_admin.html')
-
-def list_patient(request):
-    patients = Patient.objects.all()
-    context = {'patients': patients}
-    return render(request, 'admin/patient_list.html', context)
-
-def list_doctor(request):
-    doctors = Doctor.objects.all()
-    context = {'doctors': doctors}
-    return render(request, 'admin/doctor_list.html', context)
-
-
-
-
-
-def add_doctor(request):
-    
-    if request.method == 'POST':
-        try:
-            # Get form data
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            name = request.POST.get('name')
-            specialty = request.POST.get('specialty')
-            contact_number = request.POST.get('contact_number')
-            fee = request.POST.get('consultation_fee')
-            
-            # Process JSON fields
-            available_days = request.POST.getlist('available_days')
-            available_hours = request.POST.get('available_hours')
-            
-            # Create new doctor
-            doctor = Doctor(
-                username=username,
-                password=password,  # Note: In production, you should hash passwords!
-                name=name,
-                fee=fee,
-                specialty=specialty,
-                contact_number=contact_number,
-                available_days=available_days,
-                available_hours=available_hours
-            )
-            doctor.save()
-            
-            
-            return redirect('home_admin')
-        
-        except Exception as e:
-            messages.error(request, f'Error adding doctor: {str(e)}')
-    
-    # Default days and hours for the form
-    days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    common_hours = [
-        '9:00 AM - 1:00 PM',
-        '2:00 PM - 6:00 PM',
-        '9:00 AM - 5:00 PM',
-        'Emergency Only'
-    ]
-    
-    context = {
-        'days_of_week': days_of_week,
-        'common_hours': common_hours
-    }
-    return render(request, 'admin/add_doctor.html', context)
-
-def logout(request):
-    return render(request, 'user_selection')
-
-
-
 def doctor_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -249,11 +155,9 @@ def doctor_login(request):
             return redirect('login_doctor')
         
         try:
-            # Find patient by phone number
             doctor = Doctor.objects.get(username=username)
             
-            # Check password (assuming you've implemented password hashing)
-            if doctor.password == password:  # Note: In production, use proper password checking
+            if doctor.password == password:  
                 request.session['doctor'] = doctor.id
                 request.session['doctor_username'] = doctor.username
                 
@@ -271,71 +175,42 @@ def doctor_login(request):
 
 
 
+def home_patient(request):
+    patient_id = request.session.get('patient_id')
+    if not patient_id:
+        return redirect('login_patient')
+    
+    doctors = Doctor.objects.all()
+    appointments=Appointment.objects.filter(patient=patient_id)
+    
+    patient = Patient.objects.get(id=patient_id)
+    return render(request, 'patient/home_patient.html', {'patient': patient , 'doctors':doctors , 'appointments':appointments})
 
+def home_admin(request):
+      return render(request, 'admin/home_admin.html')
 
-
-def appointment_list(request):
-    appointments = Appointment.objects.all().order_by('-appointment_date')
-    return render(request, 'admin/appoinment_list.html', {'appointments': appointments})
-
-
-
-def view_appointment(request, pk):
-    appointment = get_object_or_404(Appointment, pk=pk)
-    return render(request, 'appointment/view_appointment.html', {'appointment': appointment})
-
-def update_appointment(request, pk):
-    appointment = get_object_or_404(Appointment, pk=pk)
-    if request.method == 'POST':
-        form = AppointmentForm(request.POST, instance=appointment)
-        if form.is_valid():
-            form.save()
-            return redirect('appoinment_list')
-    else:
-        form = AppointmentForm(instance=appointment)
-    return render(request, 'appointment/update_appointment.html', {'form': form})
-
-def delete_appointment(request, pk):
-    appointment = get_object_or_404(Appointment, pk=pk)
-    if request.method == 'POST':
-        appointment.delete()
-        return redirect('appoinment_list')
-    return render(request, 'appointment/confirm_delete.html', {'appointment': appointment})
-
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
-from .models import Doctor, Appointment
-from django.core.paginator import Paginator
 
 def home_doctor(request):
-    # Check if doctor is logged in (adjust based on your authentication)
+    
     doctor_id = request.session.get('doctor')
     if not doctor_id:
         return redirect('login_doctor')
-    
-    # Get the doctor object
+     
     doctor = get_object_or_404(Doctor, id=doctor_id)
     
-    # Get today's date for filtering today's appointments
     today = timezone.now().date()
-    
-    # Get all appointments for the doctor, ordered by date and time
+   
     all_appointments = Appointment.objects.filter(doctor=doctor).order_by('-appointment_date', '-appointment_time')
-    
-    # Pagination
-    paginator = Paginator(all_appointments, 10)  # Show 10 appointments per page
+   
+    paginator = Paginator(all_appointments, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # Get today's appointments
     todays_appointments = Appointment.objects.filter(
         doctor=doctor,
         appointment_date=today
     ).order_by('appointment_time')
     
-    # Calculate statistics
     stats = {
         'total': all_appointments.count(),
         'completed': all_appointments.filter(status='completed').count(),
@@ -355,20 +230,14 @@ def home_doctor(request):
     
     return render(request, 'doctor/home_doctor.html', context)
 
-
 def update_appointment_status(request, appointment_id, status):
-    # Check if doctor is logged in
     doctor_id = request.session.get('doctor')
    
-    
-    # Get the appointment
     appointment = get_object_or_404(Appointment, id=appointment_id)
     
-    # Verify the appointment belongs to the logged-in doctor
     if appointment.doctor.id != doctor_id:
         return redirect('home_doctor')
     
-    # Validate and update status
     valid_statuses = [choice[0] for choice in Appointment.status_choices]
     if status in valid_statuses:
         appointment.status = status
@@ -376,54 +245,23 @@ def update_appointment_status(request, appointment_id, status):
     
     return redirect('home_doctor')
 
-def patient_appointment(request):
-    patient_id = request.session.get('patient_id')
-    appointments=Appointment.objects.filter(patient=patient_id)
-    patient = Patient.objects.get(id=patient_id)
-    return render(request, 'patient/patient_appointment.html', { 'patient':patient, 'appointments':appointments})
-
-def list_doctor_patient(request):
-    doctors = Doctor.objects.all()
-    context = {'doctors': doctors}
-    return render(request, 'patient/doctor_list.html', context)
-
-def view_appointment_patient(request, pk):
-    appointment = get_object_or_404(Appointment, pk=pk)
-    return render(request, 'patient/view_appointment.html', {'appointment': appointment})
-
-def update_appointment_patient(request, pk):
-    appointment = get_object_or_404(Appointment, pk=pk)
-    if request.method == 'POST':
-        form = AppointmentForm(request.POST, instance=appointment)
-        if form.is_valid():
-            form.save()
-            return redirect('patient_appointment')
-    else:
-        form = AppointmentForm(instance=appointment)
-    return render(request, 'patient/update_appointment.html', {'form': form})
-
-def delete_appointment_patient(request, pk):
-    appointment = get_object_or_404(Appointment, pk=pk)
-    if request.method == 'POST':
-        appointment.delete()
-        return redirect('patient_appointment')
-    return render(request, 'patient/delete_appointment.html', {'appointment': appointment})
+def delete_appointment_status(request, appointment_id, status):
+    doctor_id = request.session.get('doctor')
+   
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    
+    if appointment.doctor.id != doctor_id:
+        return redirect('home_doctor')
+    
+    
+    appointment.delete()
+    
+    return redirect('home_doctor')
 
 
 
 
-
-
-
-
-
-
-
-try:
-    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-except Exception as e:
-    print(f"Razorpay client initialization failed: {str(e)}")
-    client = None
+client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 def create_appointment(request):
     if not request.session.get('patient_id'):
@@ -520,6 +358,152 @@ def payment_handler(request):
     return HttpResponse(status=400)
 
 
+def view_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    return render(request, 'appointment/view_appointment.html', {'appointment': appointment})
+
+def update_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            return redirect('appoinment_list')
+    else:
+        form = AppointmentForm(instance=appointment)
+    return render(request, 'appointment/update_appointment.html', {'form': form})
+
+def delete_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    if request.method == 'POST':
+        appointment.delete()
+        return redirect('appoinment_list')
+    return render(request, 'appointment/confirm_delete.html', {'appointment': appointment})
+
+
+
+def appointment_list(request):
+    appointments = Appointment.objects.all().order_by('-appointment_date')
+    return render(request, 'admin/appoinment_list.html', {'appointments': appointments})
+
+def list_prescription(request):
+    prescriptions= Prescription.objects.all()
+    context = {'prescriptions': prescriptions}
+    return render(request, 'admin/prescription_list.html' , context)
+
+def list_patient(request):
+    patients = Patient.objects.all()
+    context = {'patients': patients}
+    return render(request, 'admin/patient_list.html', context)
+
+def list_doctor(request):
+    doctors = Doctor.objects.all()
+    context = {'doctors': doctors}
+    return render(request, 'admin/doctor_list.html', context)
+
+def patient_prescriptions(request):
+    
+    patient_id = request.session.get('patient_id')
+    patient = Patient.objects.get(id=patient_id)
+    prescriptions = Prescription.objects.filter(
+        patient = Patient.objects.get(id=patient_id)
+    ).select_related('doctor', 'appointment').order_by('-date')
+    
+    return render(request, 'patient/patient_prescriptions.html', {
+        'prescriptions': prescriptions,
+        'patient':patient
+    })
+
+
+
+
+def logout(request):
+    return render(request, 'user_selection')
+
+
+
+def patient_appointment(request):
+    patient_id = request.session.get('patient_id')
+    appointments=Appointment.objects.filter(patient=patient_id)
+    patient = Patient.objects.get(id=patient_id)
+    return render(request, 'patient/patient_appointment.html', { 'patient':patient, 'appointments':appointments})
+
+def list_doctor_patient(request):
+    doctors = Doctor.objects.all()
+    context = {'doctors': doctors}
+    return render(request, 'patient/doctor_list.html', context)
+
+def view_appointment_patient(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    return render(request, 'patient/view_appointment.html', {'appointment': appointment})
+
+def update_appointment_patient(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            return redirect('patient_appointment')
+    else:
+        form = AppointmentForm(instance=appointment)
+    return render(request, 'patient/update_appointment.html', {'form': form})
+
+def delete_appointment_patient(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    if request.method == 'POST':
+        appointment.delete()
+        return redirect('patient_appointment')
+    return render(request, 'patient/delete_appointment.html', {'appointment': appointment})
+
+
+
+def add_doctor(request):
+    
+    if request.method == 'POST':
+        try:
+           
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            name = request.POST.get('name')
+            specialty = request.POST.get('specialty')
+            contact_number = request.POST.get('contact_number')
+            fee = request.POST.get('consultation_fee')
+            available_days = request.POST.getlist('available_days')
+            available_hours = request.POST.get('available_hours')
+           
+            doctor = Doctor(
+                username=username,
+                password=password,  
+                name=name,
+                fee=fee,
+                specialty=specialty,
+                contact_number=contact_number,
+                available_days=available_days,
+                available_hours=available_hours
+            )
+            doctor.save()
+            
+            
+            return redirect('home_admin')
+        
+        except Exception as e:
+            messages.error(request, f'Error adding doctor: {str(e)}')
+   
+    days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    common_hours = [
+        '9:00 AM - 1:00 PM',
+        '2:00 PM - 6:00 PM',
+        '9:00 AM - 5:00 PM',
+        'Emergency Only'
+    ]
+    
+    context = {
+        'days_of_week': days_of_week,
+        'common_hours': common_hours
+    }
+    return render(request, 'admin/add_doctor.html', context)
+
+
 
 @csrf_exempt
 def create_prescription(request, appointment_id):
@@ -542,24 +526,12 @@ def create_prescription(request, appointment_id):
             advice=advice
         )
 
-        return redirect('home_doctor')  # back to dashboard
+        return redirect('home_doctor') 
 
     return redirect('home_doctor')
 
 
 
-def patient_prescriptions(request):
-    # Get prescriptions for the logged-in patient
-    patient_id = request.session.get('patient_id')
-    patient = Patient.objects.get(id=patient_id)
-    prescriptions = Prescription.objects.filter(
-        patient = Patient.objects.get(id=patient_id)
-    ).select_related('doctor', 'appointment').order_by('-date')
-    
-    return render(request, 'patient/patient_prescriptions.html', {
-        'prescriptions': prescriptions,
-        'patient':patient
-    })
 
 
 # import stripe

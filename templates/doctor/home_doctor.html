@@ -181,7 +181,7 @@
                               <a class="dropdown-item" href="{% url 'update_appointment_status' appointment.id 'completed' %}"><i class="fas fa-calendar-check text-success me-2"></i>Complete</a>
                             </li>
                             <li>
-                              <a class="dropdown-item" href="{% url 'update_appointment_status' appointment.id 'canceled' %}"><i class="fas fa-times-circle text-danger me-2"></i>Cancel</a>
+                              <a class="dropdown-item" href="{% url 'delete_appointment_status' appointment.id 'canceled' %}"><i class="fas fa-times-circle text-danger me-2"></i>Cancel</a>
                             </li>
                           </ul>
                         </div>

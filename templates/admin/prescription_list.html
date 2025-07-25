@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center text-primary">All Prescriptions</h2>
+
+    <div class="row">
+        {% for prescription in prescriptions %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow rounded">
+                <div class="card-body">
+                    <h5 class="card-title text-info">Patient: {{ prescription.patient.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Doctor: Dr. {{ prescription.doctor.name }}</h6>
+                    <p class="mb-1"><strong>Date:</strong> {{ prescription.date }}</p>
+                    {% if prescription.appointment %}
+                        <p class="mb-1"><strong>Appointment ID:</strong> {{ prescription.appointment.id }}</p>
+                    {% endif %}
+                    <hr>
+                    <p><strong>Symptoms:</strong><br>{{ prescription.symptoms|linebreaks }}</p>
+                    <p><strong>Diagnosis:</strong><br>{{ prescription.diagnosis|linebreaks }}</p>
+                    <p><strong>Medicines:</strong><br>{{ prescription.medicines|linebreaks }}</p>
+                    {% if prescription.advice %}
+                        <p><strong>Advice:</strong><br>{{ prescription.advice|linebreaks }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-end">
+                    {% comment %} <a href="{% url 'view_prescription' prescription.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="{% url 'update_prescription' prescription.id %}" class="btn btn-sm btn-outline-warning">Edit</a>
+                    <a href="{% url 'delete_prescription' prescription.id %}" class="btn btn-sm btn-outline-danger">Delete</a> {% endcomment %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <div class="alert alert-warning">No prescriptions available.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<a href="{% url 'home_admin' %}" class="btn btn-primary position-fixed bottom-0 end-0 m-2 " style="width: 60px; height: 60px;">
+    <i >Go Back</i>
+</a>
+{% endblock %}
