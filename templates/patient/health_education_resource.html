@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Health Education Resources</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #f8f9fa;">
+
+<div class="container py-5">
+    <h2 class="text-center mb-4 text-primary">Health Education Resources</h2>
+
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        <!-- Resource 1 -->
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Healthy Eating</h5>
+                    <p class="card-text">A balanced diet rich in fruits, vegetables, whole grains, and lean proteins helps you stay energized and prevent diseases. Limit sugar, salt, and processed foods.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resource 2 -->
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-info">Exercise & Fitness</h5>
+                    <p class="card-text">Regular physical activity improves cardiovascular health, strengthens muscles, and boosts mental well-being. Aim for 30 minutes a day, 5 days a week.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resource 3 -->
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">Mental Wellness</h5>
+                    <p class="card-text">Take care of your mental health by managing stress, getting enough sleep, practicing mindfulness, and seeking help when needed.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resource 4 -->
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Disease Prevention</h5>
+                    <p class="card-text">Preventive healthcare includes regular check-ups, vaccinations, screenings, and maintaining good hygiene to avoid illness.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resource 5 -->
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-secondary">Hydration</h5>
+                    <p class="card-text">Drinking enough water daily helps regulate body temperature, keep joints lubricated, and flush out toxins. Aim for 8–10 glasses a day.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resource 6 -->
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Sleep & Recovery</h5>
+                    <p class="card-text">Adults need 7–9 hours of sleep nightly. Quality sleep improves memory, immune function, and emotional stability.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="{% url 'home_patient' %}" class="btn btn-outline-primary">Back to Dashboard</a>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

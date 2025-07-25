@@ -35,7 +35,9 @@ urlpatterns = [
   path('appointments/<int:appointment_id>/update-status/<str:status>/',views.delete_appointment_status, name='delete_appointment_status'),
   path('payment-handler/', views.payment_handler, name='payment_handler'),
   path('prescription/create/<int:appointment_id>/', views.create_prescription, name='create_prescription'),
-  path('patient/presciption/',views.patient_prescriptions,name='patient_prescriptions')
+  path('patient/presciption/',views.patient_prescriptions,name='patient_prescriptions'),
+  path('education/', views.education_static, name='health_education_static'),
+
 
 
 

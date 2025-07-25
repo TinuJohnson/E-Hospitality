@@ -535,6 +535,10 @@ def create_prescription(request, appointment_id):
 
     return redirect('home_doctor')
 
+def education_static(request):
+    return render(request, 'patient/health_education_resource.html')
+
+
 
 
 
