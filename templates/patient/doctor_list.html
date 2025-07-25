@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: rgba(43, 76, 206, 1);
+            --secondary-color: #f8f9fc;
+            --accent-color: #36b9cc;
+        }
+        
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .action-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: none;
+            transition: transform 0.3s ease;
+            height: 100%;
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .action-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .btn-appointment {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-appointment:hover {
+            background-color: #c11a2d;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+            color: var(--primary-color);
+        }
+        
+        /* Specific card border colors */
+        .action-card:nth-child(1) {
+            border-left-color: #4e73df; /* Blue for appointments */
+        }
+        
+        .action-card:nth-child(2) {
+            border-left-color: #1cc88a; /* Green for prescriptions */
+        }
+        
+        .action-card:nth-child(3) {
+            border-left-color: #f6c23e; /* Yellow for doctors */
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <!-- Welcome Section with Patient Name -->
+        <div class="welcome-section">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2>Welcome back, {{ patient.name}}!</h2>
+                    <p class="mb-0">Manage your health appointments and records</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="{% url 'create_appointment' %}" class="btn btn-appointment">
+                        <i class="fas fa-plus-circle me-2"></i>Add Appointment
+                    </a>
+                </div>
+            </div>
+        </div>
+<div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h5 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-user-md mr-2"></i>
+                Registered Doctors
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="doctorTable" width="100%" cellspacing="0">
+                    <thead class="thead-light">
+                        <tr>
+                            
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Specialty</th>
+                            <th>Contact</th>
+                            <th>Available Days</th>
+                            <th>Available Hours</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doctor in doctors %}
+                        <tr>
+                            
+                            <td>Dr. {{ doctor.name }}</td>
+                            <td>{{ doctor.username }}</td>
+                            <td>{{ doctor.specialty }}</td>
+                            <td>{{ doctor.contact_number }}</td>
+                            <td>
+                                {% for day in doctor.available_days %}
+                                   {{ day }},
+                                {% endfor %}
+                            </td>
+                            <td>{{ doctor.available_hours }}</td>
+                            {% comment %} <td>
+                                <a href="#" class="btn btn-sm btn-info" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-danger" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td> {% endcomment %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No doctors registered yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+ </div>
+    </div>
+    <a href="{% url 'home_patient' %}" class="btn btn-primary position-fixed bottom-0 end-0 m-2 " style="width: 60px; height: 60px;">
+    <i >Go Back</i>
+</a>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

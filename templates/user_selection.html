@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>E-Hospitality</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url({{MEDIA_URL}}hospital.jpg) no-repeat center center;
+      background-size: cover;
+      color: white;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container text-center">
+      <a class="navbar-brand " href="#">🏥 E-Hospitality</a>
+     
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <h1 class="display-4">Welcome to E-Hospitality</h1>
+    <p class="lead">A Unified Platform for Patients, Doctors & Admins</p>
+    <div>
+      <a href=" {% url 'login_patient' %}" class="btn btn-outline-light m-2">👤 Patient Login</a>
+      <a href="{% url 'login_doctor' %}" class="btn btn-outline-light m-2">🩺 Doctor Login</a>
+      <a href="{% url 'login_admin' %}" class="btn btn-outline-light m-2">🛠 Admin Panel</a>
+    </div>
+  </div>
+
+  <!-- About Section -->
+  <section class="py-5 text-center">
+    <div class="container">
+      <h2>About E-Hospitality</h2>
+      <p>E-Hospitality is a smart healthcare system that connects doctors, patients, and admins through a unified digital platform.</p>
+      <div class="row mt-4">
+        <div class="col-md-4">
+          <h5>👨‍⚕️ Doctor Module</h5>
+          <p>Manage appointments & patient records.</p>
+        </div>
+        <div class="col-md-4">
+          <h5>🏥 Patient Module</h5>
+          <p>Book appointments and access reports online.</p>
+        </div>
+        <div class="col-md-4">
+          <h5>🛠 Admin Panel</h5>
+          <p>Oversee the entire hospital system operations.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-primary text-white text-center py-3">
+    <p>&copy; 2025 E-Hospitality | Contact: info@ehospital.com</p>
+  </footer>
+
+  <!-- Bootstrap JS (Optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

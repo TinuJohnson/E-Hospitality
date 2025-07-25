@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Registration</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #f8f9fc;
+            --error-color: #e74a3b;
+        }
+        
+        body {
+            background-color: var(--secondary-color);
+            font-family: 'Nunito', sans-serif;
+        }
+        
+        .registration-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: none;
+            overflow: hidden;
+        }
+        
+        .registration-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 10px 0;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a5ccc;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: var(--error-color);
+        }
+        
+        .input-icon {
+            position: absolute;
+            z-index: 2;
+            display: block;
+            width: 2.375rem;
+            height: 2.375rem;
+            line-height: 2.375rem;
+            text-align: center;
+            pointer-events: none;
+            color: #d1d3e2;
+        }
+        
+        .input-group-text {
+            background-color: #f8f9fc;
+        }
+        
+        .password-strength {
+            height: 5px;
+            margin-top: 5px;
+            background: #e9ecef;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .form-text small {
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-xl-8 col-lg-10">
+                <div class="card registration-card">
+                    <div class="registration-header">
+                        <h2><i class="fas fa-user-plus me-2"></i> Patient Registration</h2>
+                        <p class="mb-0">Please fill in all required fields</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <!-- Messages -->
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        <form method="POST" action="{% url 'register_patient' %}" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label required-field">Full Name</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input type="text" class="form-control" id="name" name="name" required
+                                               value="{{ request.POST.name|default:'' }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label required-field">Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                        <input type="email" class="form-control" id="email" name="email" required
+                                               value="{{ request.POST.email|default:'' }}">
+                                    </div>
+                                    <small class="form-text text-muted">We'll never share your email</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4 mb-3">
+                                    <label for="gender" class="form-label required-field">Gender</label>
+                                    <select class="form-select" id="gender" name="gender" required>
+                                        <option value="" disabled selected>Select Gender</option>
+                                        {% for value, label in gender_choices %}
+                                            <option value="{{ value }}" {% if request.POST.gender == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="bloodgroup" class="form-label required-field">Blood Group</label>
+                                    <select class="form-select" id="bloodgroup" name="bloodgroup" required>
+                                        <option value="" disabled selected>Select Blood Group</option>
+                                        {% for value, label in bloodgroup_choices %}
+                                            <option value="{{ value }}" {% if request.POST.bloodgroup == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="date_of_birth" class="form-label required-field">Date of Birth</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required
+                                               value="{{ request.POST.date_of_birth|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="contact_number" class="form-label required-field">Contact Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                        <input type="tel" class="form-control" id="contact_number" name="contact_number" required
+                                               value="{{ request.POST.contact_number|default:'' }}">
+                                    </div>
+                                    <small class="form-text text-muted">Format: 1234567890</small>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="address" class="form-label required-field">Address</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                        <input type="text" class="form-control" id="address" name="address" required
+                                               value="{{ request.POST.address|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="allergies" class="form-label">Allergies (if any)</label>
+                                    <textarea class="form-control" id="allergies" name="allergies" rows="2">{{ request.POST.allergies|default:'' }}</textarea>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="medical_history" class="form-label">Medical History (if any)</label>
+                                    <textarea class="form-control" id="medical_history" name="medical_history" rows="2">{{ request.POST.medical_history|default:'' }}</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label required-field">Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input type="password" class="form-control" id="password" name="password" required
+                                               >
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="password-strength mt-2">
+                                        <div class="password-strength-bar" id="password-strength-bar"></div>
+                                    </div>
+                                   
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="password1" class="form-label required-field">Confirm Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input type="password" class="form-control" id="password1" name="password1" required>
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div id="password-match" class="mt-2 small"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-user-plus me-2"></i> Register
+                                </button>
+                            </div>
+                            
+                            <div class="mt-3 text-center">
+                                <p>Already have an account? <a href="{% url 'login_patient' %}">Login here</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% comment %} <script>
+        // Password strength indicator
+        function checkPasswordStrength(password) {
+            const strengthBar = document.getElementById('password-strength-bar');
+            let strength = 0;
+            
+            if (password.length >= 8) strength += 1;
+            if (password.match(/[a-z]+/)) strength += 1;
+            if (password.match(/[A-Z]+/)) strength += 1;
+            if (password.match(/[0-9]+/)) strength += 1;
+            if (password.match(/[$@#&!]+/)) strength += 1;
+            
+            const width = (strength / 5) * 100;
+            strengthBar.style.width = width + '%';
+            
+            if (strength < 2) {
+                strengthBar.style.backgroundColor = '#e74a3b'; // Red
+            } else if (strength < 4) {
+                strengthBar.style.backgroundColor = '#f6c23e'; // Yellow
+            } else {
+                strengthBar.style.backgroundColor = '#1cc88a'; // Green
+            }
+        }
+        
+        // Password match checker
+        document.getElementById('password1').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            const matchText = document.getElementById('password-match');
+            
+            if (confirmPassword === '') {
+                matchText.textContent = '';
+                matchText.style.color = '';
+            } else if (password === confirmPassword) {
+                matchText.textContent = 'Passwords match!';
+                matchText.style.color = '#1cc88a';
+            } else {
+                matchText.textContent = 'Passwords do not match!';
+                matchText.style.color = '#e74a3b';
+            }
+        });
+        
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('input');
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+    </script> {% endcomment %}
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Doctor Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+      :root {
+        --primary-color: rgb(30, 205, 45);
+        --secondary-color: #f8f9fc;
+        --accent-color: #3a0ca3;
+      }
+      
+      .welcome-section {
+        background: linear-gradient(135deg, var(--primary-color) 40%, var(--accent-color) 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+      .btn-logout {
+        background-color: var(--danger-color);
+        color: white;
+        padding: 12px 25px;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        border: none;
+        transition: all 0.3s;
+      }
+      
+      .status-pending {
+        color: #f39c12;
+        font-weight: bold;
+      }
+      .status-completed {
+        color: #27ae60;
+        font-weight: bold;
+      }
+      .status-canceled {
+        color: #e74c3c;
+        font-weight: bold;
+      }
+      .status-confirmed {
+        color: #3498db;
+        font-weight: bold;
+      }
+      .patient-details-card {
+        transition: all 0.3s ease;
+      }
+      .patient-details-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+      .floating-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container py-4">
+      <!-- Welcome Section with Patient Name -->
+      <div class="welcome-section">
+        <div class="row align-items-center">
+          <div class="col-md-8 text-center">
+            <h2>Welcome, Dr. {{ doctor.name }}</h2>
+            <p class="text-muted">Specialty: {{ doctor.specialty }}</p>
+          </div>
+          <div class="col-md-4 text-md-end mt-3 mt-md-1">
+            <a href="{% url 'user_selection' %}" class="btn btn-logout"><i class="fas fa-sign-out-alt me-1"></i> Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card shadow-sm mb-4">
+            <div class="card-header" style="background-color: rgb(30, 205, 45); color: white;">
+              <h4 class="mb-0">Appointment Statistics</h4>
+            </div>
+            <div class="card-body">
+              <div class="row text-center">
+                <div class="col-4">
+                  <h5 class="text-primary">{{ stats.total }}</h5>
+                  <p class="text-muted">Total</p>
+                </div>
+                <div class="col-4">
+                  <h5 class="text-primary">{{ stats.confirmed }}</h5>
+                  <p class="text-muted">Confirmed</p>
+                </div>
+                <div class="col-4">
+                  <h5 class="text-success">{{ stats.completed }}</h5>
+                  <p class="text-muted">Completed</p>
+                </div>
+                <div class="col-12">
+                  <h5 class="text-warning">{{ stats.pending }}</h5>
+                  <p class="text-muted">Pending</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-header" style="background-color: rgb(30, 205, 45); color: white;">
+              <h4 class="mb-0">Today's Schedule</h4>
+            </div>
+            <div class="card-body">
+              {% if todays_appointments %}
+                <ul class="list-group">
+                  {% for app in todays_appointments %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      {{ app.patient.name }}
+                      <span class="badge bg-primary rounded-pill">{{ app.appointment_time|time:'h:i A' }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-muted fst-italic">No appointments today</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-5">
+        <div class="card-header" style="background-color: rgb(30, 205, 45); color: white;">
+          <h4 class="mb-0">Appointment Management</h4>
+        </div>
+        <div class="card-body">
+          {% if appointments %}
+            <div class="table-responsive">
+              <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>Patient</th>
+                    <th>Date & Time</th>
+                    <th>Symptoms</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                    <th>Prescription</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for appointment in appointments %}
+                    <tr>
+                      <td>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#patientModal{{ appointment.id }}">{{ appointment.patient.name }}</a>
+                      </td>
+                      <td>
+                        {{ appointment.appointment_date }}<br />
+                        {{ appointment.appointment_time }}
+                      </td>
+                      <td>{{ appointment.symptoms|truncatechars:30 }}</td>
+                      <td>
+                        <span class="status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+                      </td>
+                      <td>
+                        <div class="dropdown">
+                          <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="statusDropdown{{ appointment.id }}" data-bs-toggle="dropdown" aria-expanded="false">Change Status</button>
+                          <ul class="dropdown-menu" aria-labelledby="statusDropdown{{ appointment.id }}">
+                            <li>
+                              <a class="dropdown-item" href="{% url 'update_appointment_status' appointment.id 'confirm' %}"><i class="fas fa-check-circle text-primary me-2"></i>Confirm</a>
+                            </li>
+                            <li>
+                              <a class="dropdown-item" href="{% url 'update_appointment_status' appointment.id 'completed' %}"><i class="fas fa-calendar-check text-success me-2"></i>Complete</a>
+                            </li>
+                            <li>
+                              <a class="dropdown-item" href="{% url 'update_appointment_status' appointment.id 'canceled' %}"><i class="fas fa-times-circle text-danger me-2"></i>Cancel</a>
+                            </li>
+                          </ul>
+                        </div>
+                      </td>
+                      <td>
+                        <!-- Prescription Button -->
+                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#prescriptionModal{{ appointment.id }}"><i class="fas fa-prescription-bottle-medical me-1"></i>Write</button>
+                      </td>
+                    </tr>
+
+                    <!-- Patient Details Modal -->
+                    <div class="modal fade" id="patientModal{{ appointment.id }}" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                          <div class="modal-header" style="background-color: rgb(30, 205, 45); color: white;">
+                            <h5 class="modal-title" id="patientModalLabel">Patient Details</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <div class="row">
+                              <div class="col-md-4">
+                                <div class="text-center mb-3">
+                                  <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                    <i class="fas fa-user fa-3x text-primary"></i>
+                                  </div>
+                                </div>
+                                <h4 class="text-center">{{ appointment.patient.name }}</h4>
+                                <p class="text-center text-muted">Patient ID: {{ appointment.patient.id }}</p>
+                              </div>
+                              <div class="col-md-8">
+                                <div class="card patient-details-card">
+                                  <div class="card-body">
+                                    <h5 class="card-title">Medical Information</h5>
+                                    <div class="row mb-3">
+                                      <div class="col-6">
+                                        <p>
+                                          <strong>Gender:</strong> {{ appointment.patient.get_gender_display }}
+                                        </p>
+                                      </div>
+                                      <div class="col-6">
+                                        <p>
+                                          <strong>Blood Type:</strong> {{ appointment.patient.bloodgroup|default:'N/A' }}
+                                        </p>
+                                        <p>
+                                          <strong>Allergies:</strong> {{ appointment.patient.allergies|default:'None' }}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <h5 class="card-title">Contact Information</h5>
+                                    <p>
+                                      <strong>Email:</strong> {{ appointment.patient.email }}
+                                    </p>
+                                    <p>
+                                      <strong>Phone:</strong> {{ appointment.patient.contact_number }}
+                                    </p>
+                                    <p>
+                                      <strong>Address:</strong> {{ appointment.patient.address }}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="mt-3">
+                              <h5>Appointment Details</h5>
+                              <p>
+                                <strong>Date:</strong> {{ appointment.appointment_date }}
+                              </p>
+                              <p>
+                                <strong>Time:</strong> {{ appointment.appointment_time }}
+                              </p>
+                              <p>
+                                <strong>Symptoms:</strong> {{ appointment.symptoms }}
+                              </p>
+                              <p>
+                                <strong>Notes:</strong> 
+                                    {% if appointment.prescriptions.exists %}
+                                            Prescription added
+                                    {% else %}
+                                        {{ appointment.notes|default:"No additional notes" }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <a href="{% url 'update_appointment_status' appointment.id 'completed' %}" class="btn btn-success"><i class="fas fa-calendar-check me-2"></i>Mark as Completed</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% for appointment in appointments %}
+            <!-- Prescription Modal - inside the appointment loop -->
+            <div class="modal fade" id="prescriptionModal{{ appointment.id }}" tabindex="-1" aria-labelledby="prescriptionModalLabel{{ appointment.id }}" aria-hidden="true">
+              <div class="modal-dialog">
+                <form method="post" action="{% url 'create_prescription' appointment.id %}">
+                  {% csrf_token %}
+                  <div class="modal-content">
+                    <div class="modal-header" style="background-color: #1ecd2d; color: white;">
+                      <h5 class="modal-title" id="prescriptionModalLabel{{ appointment.id }}">New Prescription</h5>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="mb-3">
+                        <label class="form-label">Symptoms</label>
+                        <textarea name="symptoms" class="form-control" required>{{ appointment.symptoms }}</textarea>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Diagnosis</label>
+                        <textarea name="diagnosis" class="form-control" required></textarea>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Medicines</label>
+                        <textarea name="medicines" class="form-control" required></textarea>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Advice</label>
+                        <textarea name="advice" class="form-control"></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save Prescription</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+            <!-- Prescription Modal -->
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+              <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                  {% if page_obj.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page=1" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+                    </li>
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                    </li>
+                  {% endif %}
+
+                  {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                      <li class="page-item active">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                      </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+
+                  {% if page_obj.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+                    </li>
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            {% endif %}
+          {% else %}
+            <p class="text-muted fst-italic">No appointments found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <a href="{% url 'home_doctor' %}" class="floating-btn btn btn-primary"><i class="fas fa-user-md"></i></a>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

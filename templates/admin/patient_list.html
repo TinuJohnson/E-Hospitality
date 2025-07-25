@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+ <div class="row mb-4">
+           
+           
+        
+        <!-- Patients Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-user-injured mr-2"></i>
+                    Registered Patients
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive" id="patientTable">
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>Date of Birth</th>
+                                <th>Address</th>
+                                <th>Allergies</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for patient in patients %}
+                            <tr>
+                                <td>{{ patient.id }}</td>
+                                <td>{{ patient.name }}</td>
+                                <td>{{ patient.contact_number }}</td>
+                                <td>{{ patient.date_of_birth }}</td>
+                                <td>{{ patient.address }}</td>
+                                <td>{{ patient.allergies|default:"None" }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-info" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-danger" title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">No patients registered yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+<a href="{% url 'home_admin' %}" class="btn btn-primary position-fixed bottom-0 end-0 m-2 " style="width: 60px; height: 60px;">
+    <i >Go Back</i>
+</a>
+        {% endblock %}

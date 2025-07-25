@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Appointment Deletion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .confirmation-card {
+            max-width: 500px;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .confirmation-header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .confirmation-body {
+            padding: 30px;
+            background-color: white;
+        }
+        .appointment-details {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            margin-bottom: 8px;
+            display: flex;
+        }
+        .detail-label {
+            font-weight: 600;
+            min-width: 120px;
+            color: #495057;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+        .btn-outline-secondary {
+            padding: 10px 25px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+        }
+        .warning-icon {
+            color: #dc3545;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="confirmation-card">
+                    <div class="confirmation-header">
+                        <h3><i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion</h3>
+                    </div>
+                    <div class="confirmation-body text-center">
+                        <div class="warning-icon">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <h4 class="mb-4">Are you sure you want to delete this appointment?</h4>
+                        
+                        <div class="appointment-details text-start">
+                            <div class="detail-item">
+                                <span class="detail-label">Patient:</span>
+                                <span>{{ appointment.patient }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Doctor:</span>
+                                <span>{{ appointment.doctor }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Date:</span>
+                                <span>{{ appointment.appointment_date }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Time:</span>
+                                <span>{{ appointment.appointment_time }}</span>
+                            </div>
+                            {% if appointment.reason %}
+                            <div class="detail-item">
+                                <span class="detail-label">Reason:</span>
+                                <span>{{ appointment.reason }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <p class="text-muted mb-4"><i class="fas fa-info-circle me-2"></i>This action cannot be undone.</p>
+                        
+                        <form method="POST" class="d-flex justify-content-center gap-3">
+                            {% csrf_token %}
+                            <a href="{% url 'patient_appointment' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt me-2"></i>Delete Appointment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

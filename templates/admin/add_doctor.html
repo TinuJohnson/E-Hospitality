@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0"><i class="fas fa-user-md me-2"></i> Add New Doctor</h2>
+        </div>
+        <div class="card-body">
+            <form method="post" class="mt-3">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label for="username" class="form-label">Username*</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                        <small class="text-muted">For login purposes</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">Password*</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personal Details -->
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label">Full Name*</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="specialty" class="form-label">Specialty*</label>
+                        <input type="text" class="form-control" id="specialty" name="specialty" required>
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label for="contact_number" class="form-label">Contact Number*</label>
+                        <input type="tel" class="form-control" id="contact_number" name="contact_number" required>
+                        <small class="text-muted">Format: +91 9876543210</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="consultation_fee" class="form-label">Consultation Fee (₹)*</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control" id="consultation_fee" name="consultation_fee" 
+                                   min="0" step="100" value="500" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Availability -->
+                <div class="mb-3">
+                    <label class="form-label">Available Days*</label>
+                    <div class="row">
+                        {% for day in days_of_week %}
+                        <div class="col-6 col-md-3 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ day }}" 
+                                       id="day_{{ forloop.counter }}" name="available_days" checked>
+                                <label class="form-check-label" for="day_{{ forloop.counter }}">
+                                    {{ day }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="available_hours" class="form-label">Available Hours*</label>
+                        <select class="form-select" id="available_hours" name="available_hours" required>
+                            {% for hours in common_hours %}
+                <option value="{{ hours }}">{{ hours }}</option>
+                {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="max_patients" class="form-label">Max Patients/Day</label>
+                        <input type="number" class="form-control" id="max_patients" name="max_patients" 
+                               min="1" max="50" value="20">
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'home_admin' %}" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-arrow-left me-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Add Doctor
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle password visibility
+document.querySelector('.toggle-password').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = this.querySelector('i');
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+});
+
+// Phone number formatting
+document.getElementById('contact_number').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9+]/g, '');
+});
+</script>
+
+<style>
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+.toggle-password {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Appointments</h1>
+<a href="{% url 'create_appointment' %}" class="btn btn-primary">New Appointment</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Date</th>
+            <th>Time<th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for appointment in appointments %}
+        <tr>
+            <td>{{ appointment.patient.name }}</td>
+            <td>Dr. {{ appointment.doctor.name }}</td>
+            <td>{{ appointment.appointment_date }}</td>
+            <td>{{ appointment.appointment_time }}</td>
+            <td>{{ appointment.get_status_display }}</td>
+            <td>
+                <a href="{% url 'view_appointment' appointment.pk %}" class="btn btn-info">View</a>
+                <a href="{% url 'update_appointment' appointment.pk %}" class="btn btn-warning">Edit</a>
+                <a href="{% url 'delete_appointment' appointment.pk %}" class="btn btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'home_admin' %}" class="btn btn-primary position-fixed bottom-0 end-0 m-2 " style="width: 60px; height: 60px;">
+    <i >Go Back</i>
+</a>
+{% endblock %}
