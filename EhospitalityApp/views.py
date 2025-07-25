@@ -401,6 +401,11 @@ def list_doctor(request):
     context = {'doctors': doctors}
     return render(request, 'admin/doctor_list.html', context)
 
+def delete_doctor(request, pk):
+    doctor = get_object_or_404(Doctor, pk=pk)
+    doctor.delete()
+    return redirect('list_doctor')  
+
 def patient_prescriptions(request):
     
     patient_id = request.session.get('patient_id')

@@ -14,6 +14,8 @@ urlpatterns = [
   path('login/admin/',views.admin_login, name='login_admin'),
   path('home/admin/',views.home_admin,name='home_admin'),
   path('home/adddoctor/',views.add_doctor,name='add_doctor'),
+  path('doctor/delete/<int:pk>/', views.delete_doctor, name='delete_doctor'),
+
   path('login/doctor/',views.doctor_login,name='login_doctor'),
   path('home/doctor/',views.home_doctor,name='home_doctor'),
   path('home/list_doctors/',views.list_doctor,name='list_doctor'),

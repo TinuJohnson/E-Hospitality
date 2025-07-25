@@ -1,46 +1,60 @@
-{% extends 'base.html' %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Complete Payment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Optional: Your Logo -->
+    <link rel="icon" type="image/png" href="/static/img/logo.png">
+</head>
+<body>
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card">
+            <div class="card shadow">
                 <div class="card-header bg-primary text-white">
-                    <h4>Complete Payment</h4>
+                    <h4 class="mb-0">Complete Payment</h4>
                 </div>
                 <div class="card-body">
-                    <p>Appointment with Dr. {{ appointment.doctor.name }}</p>
-                    <p>Amount: ₹{{ appointment.fee }}</p>
-                    
-                    <button id="rzp-button" class="btn btn-primary">Pay Now</button>
+                    <p class="mb-2"><strong>Appointment with:</strong> Dr. {{ appointment.doctor.name }}</p>
+                    <p class="mb-4"><strong>Amount:</strong> ₹{{ appointment.fee }}</p>
+                    <button id="rzp-button" class="btn btn-primary w-100">Pay Now</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Razorpay Checkout Script -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 var options = {
-    "key": "{{ razorpay_key }}",
-    "amount": "{{ amount }}", 
+    "key": "{{ razorpay_key }}",  // Replace with your Razorpay API Key
+    "amount": "{{ amount }}",     // Amount in paisa (e.g. 50000 for ₹500)
     "currency": "INR",
     "name": "Your Clinic Name",
     "description": "Appointment Payment",
-    "image": "/static/img/logo.png",
-    "order_id": "{{ order_id }}",
+    "image": "/static/img/logo.png",  // Optional logo
+    "order_id": "{{ order_id }}",     // Razorpay order_id from server
     "handler": function(response){
-        // Submit form with payment details
+        // Create and submit form to Django handler view
         var form = document.createElement('form');
         form.method = 'POST';
-        
         form.action = "{% url 'payment_handler' %}";
-        
+
+        // CSRF token
         var csrf = document.createElement('input');
         csrf.type = 'hidden';
         csrf.name = 'csrfmiddlewaretoken';
         csrf.value = '{{ csrf_token }}';
         form.appendChild(csrf);
-        
+
+        // Razorpay payment data
         ['razorpay_payment_id', 'razorpay_order_id', 'razorpay_signature'].forEach(function(param) {
             var input = document.createElement('input');
             input.type = 'hidden';
@@ -48,7 +62,7 @@ var options = {
             input.value = response[param];
             form.appendChild(input);
         });
-        
+
         document.body.appendChild(form);
         form.submit();
     },
@@ -60,10 +74,13 @@ var options = {
         "color": "#3399cc"
     }
 };
+
 var rzp = new Razorpay(options);
 document.getElementById('rzp-button').onclick = function(e){
     rzp.open();
     e.preventDefault();
-}
+};
 </script>
-{% endblock %}
+
+</body>
+</html>
