@@ -82,7 +82,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'hospita',
         'USER' : 'root',
-        'PORT' : 3306,
+        'PORT' : 3308,
         'HOST' : 'localhost',
     }
 }
