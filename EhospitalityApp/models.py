@@ -110,7 +110,7 @@ class Prescription(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='prescriptions'  # This line avoids the clash
+        related_name='prescriptions'  
     )
     symptoms = models.TextField()
     diagnosis = models.TextField()
@@ -122,5 +122,26 @@ class Prescription(models.Model):
     def __str__(self):
         return f"Prescription for {self.patient.name} by Dr. {self.doctor.name}"
 
+
+class Payment(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ('created', 'Created'),
+        ('authorized', 'Authorized'),
+        ('captured', 'Captured'),
+        ('refunded', 'Refunded'),
+        ('failed', 'Failed'),
+    ]
+
+    appointment = models.ForeignKey('Appointment', on_delete=models.CASCADE)
+    razorpay_order_id = models.CharField(max_length=100)
+    razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    razorpay_signature = models.CharField(max_length=100, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='created')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Payment {self.razorpay_order_id} - {self.get_status_display()}"
 
 

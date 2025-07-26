@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Admin, Patient,Doctor,Appointment,Prescription
+from .models import Admin, Patient,Doctor,Appointment,Prescription,Payment
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt 
 from .forms import AppointmentForm
@@ -282,8 +282,10 @@ def create_appointment(request):
             
             appointment = form.save(commit=False)
             # Get fee from the selected doctor
-            appointment.fee = appointment.doctor.fee  # Get fee from doctor model
+            appointment.fee = appointment.doctor.fee
+            appointment.status = 'pending_payment'  # Set initial status
             appointment.save()
+           
             
             # Create Razorpay order
             try:
@@ -296,22 +298,28 @@ def create_appointment(request):
                 }
                 order = client.order.create(data=order_data)
                 
-                # Save Razorpay order ID
-                appointment.razorpay_order_id = order['id']
-                appointment.save()
+                # Create Payment record
+                payment = Payment.objects.create(
+                    appointment=appointment,
+                    razorpay_order_id=order['id'],
+                    amount=appointment.fee,
+                    status='created'
+                )
                 
                 # Prepare payment context
                 context = {
                     'appointment': appointment,
+                    'payment': payment,
                     'razorpay_key': settings.RAZORPAY_KEY_ID,
                     'order_id': order['id'],
                     'amount': amount,
                     'patient_name': patient.name,
-                    'patient_email': patient.email
+                    'patient_email': patient.email,
+                    'patient_contact': patient.contact_number
                 }
                 
-                
                 return render(request, 'payment/payment.html', context)
+                
             except Exception as e:
                 print(f"Razorpay order creation failed: {str(e)}")
                 appointment.delete()  # Clean up the appointment if payment order fails
@@ -343,16 +351,34 @@ def payment_handler(request):
             }
             client.utility.verify_payment_signature(params_dict)
             
-            # Update appointment payment status
-            appointment = Appointment.objects.get(razorpay_order_id=order_id)
-            appointment.payment_status = True
-            appointment.razorpay_payment_id = payment_id  # Store payment ID for reference
-            appointment.save()
+            # Get payment details from Razorpay
+            razorpay_payment = client.payment.fetch(payment_id)
             
+            # Update Payment model
+            payment = Payment.objects.get(razorpay_order_id=order_id)
+            payment.razorpay_payment_id = payment_id
+            payment.razorpay_signature = signature
+            payment.status = 'completed'
+            payment.save()
+            
+            # Update appointment
+           
             return redirect('appointment_success')
+            
         except Exception as e:
             # Log the error for debugging
             print(f"Payment verification failed: {str(e)}")
+            
+            # Update payment status if it exists
+            order_id = request.POST.get('razorpay_order_id')
+            if order_id:
+                try:
+                    payment = Payment.objects.get(razorpay_order_id=order_id)
+                    payment.status = 'failed'
+                    payment.save()
+                except Payment.DoesNotExist:
+                    pass
+            
             return redirect('payment_failed')
     
     return HttpResponse(status=400)
@@ -549,8 +575,22 @@ def payment_failed(request):
     return render(request, 'payment_failed.html')
 
 
+from django.shortcuts import get_object_or_404
+from .models import Patient, Appointment, Payment
 
-
+def patient_payments(request, patient_id, appointment_id):
+    patient = get_object_or_404(Patient, pk=patient_id)
+    appointment = get_object_or_404(Appointment, pk=appointment_id, patient=patient)
+    
+    # Get payments ONLY for this appointment
+    payments = Payment.objects.filter(appointment=appointment)
+    
+    context = {
+        'patient': patient,
+        'appointment': appointment,
+        'payments': payments,
+    }
+    return render(request, 'payment/patient_payment.html', context)
 
 # import stripe
 # from django.conf import settings

@@ -1,11 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Payment Failed</title>
-</head>
-<body>
-    <h1>Payment Failed ❌</h1>
-    <p>Please try again or contact support.</p>
-    <a href="{% url 'create_appointment' %}">Retry Payment</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Payment Failed</h4>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-times-circle fa-5x text-danger mb-4"></i>
+                    <h3>Payment Unsuccessful</h3>
+                    <p>We couldn't process your payment. Please try again.</p>
+                    <a href="{% url 'create_appointment' %}" class="btn btn-primary mt-3">
+                        Try Again
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

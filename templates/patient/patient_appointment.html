@@ -79,7 +79,7 @@
         <div class="welcome-section">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h2>Welcome , {{ patient.name}}!</h2>
+                    <h2>Welcome , {{ patient.name}}</h2>
                     <p class="mb-0">Manage your health appointments and records</p>
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
@@ -103,6 +103,8 @@
                                 <th>Doctor</th>
                                 <th>Speciality</th>
                                 <th>Status</th>
+                                <th>Actions</th>
+                                <th>Payment History</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -121,10 +123,13 @@
                                     </span>
                                 </td>
                                 <td>
-                <a href="{% url 'appointment_list_patient' appointment.pk %}" class="btn btn-info">View</a>
-                <a href="{% url 'appointment_update_patient' appointment.pk %}" class="btn btn-warning">Edit</a>
-                <a href="{% url 'appointment_delete_patient' appointment.pk %}" class="btn btn-danger">Delete</a>
-            </td>
+                                    <a href="{% url 'appointment_list_patient' appointment.pk %}" class="btn btn-info">View</a>
+                                    <a href="{% url 'appointment_update_patient' appointment.pk %}" class="btn btn-warning">Edit</a>
+                                    <a href="{% url 'appointment_delete_patient' appointment.pk %}" class="btn btn-danger">Delete</a>
+                                </td>
+                                <td>
+                                    <a href="{% url 'patient_payment' patient.id appointment.pk %}" class="btn btn-primary">Check</a>
+
                             </tr>
                             {% empty %}
                             <tr>

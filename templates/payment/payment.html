@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <title>Complete Payment</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Optional: Your Logo -->
     <link rel="icon" type="image/png" href="/static/img/logo.png">
+    <style>
+        .receipt-box {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .loading-spinner {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
@@ -21,27 +28,45 @@
                     <h4 class="mb-0">Complete Payment</h4>
                 </div>
                 <div class="card-body">
-                    <p class="mb-2"><strong>Appointment with:</strong> Dr. {{ appointment.doctor.name }}</p>
-                    <p class="mb-4"><strong>Amount:</strong> ₹{{ appointment.fee }}</p>
-                    <button id="rzp-button" class="btn btn-primary w-100">Pay Now</button>
+                    <div class="receipt-box mb-4">
+                        <h5>Appointment Details</h5>
+                        <p><strong>Doctor:</strong> Dr. {{ appointment.doctor.name }}</p>
+                        <p><strong>Date:</strong> {{ appointment.appointment_date }}</p>
+                        <p><strong>Time:</strong> {{ appointment.appointment_time }}</p>
+                        <p><strong>Amount:</strong> ₹{{ appointment.fee }}</p>
+                        <p><strong>Order ID:</strong> {{ order_id }}</p>
+                    </div>
+                    
+                    <button id="rzp-button" class="btn btn-primary w-100">
+                        Pay Now ₹{{ appointment.fee }}
+                    </button>
+                    <div id="loading-spinner" class="text-center mt-3 loading-spinner">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Processing payment...</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Razorpay Checkout Script -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 var options = {
-    "key": "{{ razorpay_key }}",  // Replace with your Razorpay API Key
-    "amount": "{{ amount }}",     // Amount in paisa (e.g. 50000 for ₹500)
+    "key": "{{ razorpay_key }}",
+    "amount": "{{ amount }}",
     "currency": "INR",
-    "name": "Your Clinic Name",
+    "name": "{{ patient_name }}",
     "description": "Appointment Payment",
-    "image": "/static/img/logo.png",  // Optional logo
-    "order_id": "{{ order_id }}",     // Razorpay order_id from server
+    "image": "/static/img/logo.png",
+    "order_id": "{{ order_id }}",
     "handler": function(response){
+        // Show loading spinner
+        document.getElementById('rzp-button').style.display = 'none';
+        document.getElementById('loading-spinner').style.display = 'block';
+        
         // Create and submit form to Django handler view
         var form = document.createElement('form');
         form.method = 'POST';
@@ -67,11 +92,18 @@ var options = {
         form.submit();
     },
     "prefill": {
-        "name": "{{ name }}",
-        "email": "{{ email }}"
+        "name": "{{ patient_name }}",
+        "email": "{{ patient_email }}",
+        "contact": "{{ patient_contact }}"
     },
     "theme": {
         "color": "#3399cc"
+    },
+    "modal": {
+        "ondismiss": function() {
+            // Handle when payment modal is closed
+            console.log("Payment window closed");
+        }
     }
 };
 
