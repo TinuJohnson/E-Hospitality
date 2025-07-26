@@ -434,8 +434,10 @@ def patient_appointment(request):
     return render(request, 'patient/patient_appointment.html', { 'patient':patient, 'appointments':appointments})
 
 def list_doctor_patient(request):
+    patient_id = request.session.get('patient_id')
     doctors = Doctor.objects.all()
-    context = {'doctors': doctors}
+    patient = Patient.objects.get(id=patient_id)
+    context = {'doctors': doctors,'patient':patient}
     return render(request, 'patient/doctor_list.html', context)
 
 def view_appointment_patient(request, pk):
