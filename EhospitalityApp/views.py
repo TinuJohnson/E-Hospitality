@@ -540,6 +540,13 @@ def create_prescription(request, appointment_id):
 def education_static(request):
     return render(request, 'patient/health_education_resource.html')
 
+def payment_success(request):
+    """Renders the payment success page."""
+    return render(request, 'payment_success.html')
+
+def payment_failed(request):
+    """Renders the payment failed page."""
+    return render(request, 'payment_failed.html')
 
 
 
